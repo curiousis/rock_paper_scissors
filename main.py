@@ -19,9 +19,9 @@ async def join_session(username, session_id):
     if session_id not in sessions:
         return {"error, session id not found"}
 
-    print(active_sessions)
-    if session_id in active_sessions:
-        print(active_sessions[session_id])
+    if username in active_sessions:
+        print(username)
+        return {"res": "error, this name is already in use!"}
 
     if session_id not in active_sessions:
         active_sessions[session_id] = [
@@ -31,24 +31,33 @@ async def join_session(username, session_id):
             }
         ]
         return {"data": active_sessions}
-    elif (
-        len(active_sessions[session_id]) < 2
-        and username not in active_sessions[session_id]
-    ):
-        active_sessions[session_id].append(
-            {
-                "username": username,
-                "choice": random.choice(["rock", "paper", "scissors"]),
-            }
-        )
-        return {"data": active_sessions}
+    elif len(active_sessions[session_id]) < 2:
+
+        for user in active_sessions[session_id]:
+            if user["username"] == username:
+                print("hehehe")
+                print(user["username"], active_sessions[session_id][0]["username"])
+
+                return {"error": "error, this username is unavailable"}
+
+            if user["username"] not in active_sessions[session_id][0]:
+                active_sessions[session_id].append(
+                    {
+                        "username": username,
+                        "choice": random.choice(["rock", "paper", "scissors"]),
+                    }
+                )
+                return {"data": active_sessions}
+            else:
+                return {"error": "this user already in use"}
     else:
-        return {"message": "error, session full, or username already in use"}
+        return {"message": "error, session full"}
 
 
 @app.get("/api/session_info")
 async def session_info(session_id):
     try:
+        print(active_sessions)
         if session_id in active_sessions:
             user1 = active_sessions[session_id][0]
             user2 = active_sessions[session_id][1]
